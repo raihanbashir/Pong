@@ -21,6 +21,7 @@ public class GamePanel extends JPanel implements Runnable{
     Paddle paddle2;
     Ball ball ;
     Score score;
+    SoundManager bounceSound = new SoundManager("Pong/plastic-ball-bounce-14790.wav");
 
 
     GamePanel(){
@@ -117,6 +118,12 @@ public class GamePanel extends JPanel implements Runnable{
             newBall();
             //System.out.println("Player 1: "+score.player1);
         }
+        if (ball.intersects(paddle1) || ball.intersects(paddle2)) {
+            if(bounceSound!=null){
+                bounceSound.play();
+            }
+        }
+
     }
     public void run(){
         // Game loop

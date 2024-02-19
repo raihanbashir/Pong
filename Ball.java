@@ -11,9 +11,11 @@ public class Ball extends Rectangle{
     int xVelocity;
     int yVelocity;
     int initialSpeed = 2;
+    SoundManager bounceSound; // Add a SoundManager field
     
     Ball(int x, int y, int width, int height){
         super(x,y,width,height);
+        bounceSound = new SoundManager("Pong/plastic-ball-bounce-14790.wav"); // Initialize SoundManager
         random = new Random();
         int randomXDirection = random.nextInt(2);
         if (randomXDirection == 0){
