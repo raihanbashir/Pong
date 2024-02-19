@@ -22,7 +22,8 @@ public class GamePanel extends JPanel implements Runnable{
     Ball ball ;
     Score score;
     SoundManager bounceSound = new SoundManager("Pong/plastic-ball-bounce-14790.wav");
-
+    ScoreManager scoreManager;
+    boolean isGameOver;
 
     GamePanel(){
         newPaddles();
@@ -31,6 +32,7 @@ public class GamePanel extends JPanel implements Runnable{
         this.setFocusable(true);
         this.addKeyListener(new AL());
         this.setPreferredSize(Screen_Size);
+        scoreManager = new ScoreManager(5, "highscores.txt"); // Example: Score limit is 5
         
         gameThread = new Thread(this);
         gameThread.start();
@@ -56,6 +58,12 @@ public class GamePanel extends JPanel implements Runnable{
         paddle2.draw(g);
         ball.draw(g);
         score.draw(g);
+        if (isGameOver) {
+            // Draw game over message
+            g.setColor(Color.RED);
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+            g.drawString("Game Over", getWidth() / 2 - 120, getHeight() / 2);
+        }
     }
     public void move(){
         paddle1.move();
@@ -109,19 +117,32 @@ public class GamePanel extends JPanel implements Runnable{
         if (ball.x <= 0){
             score.player2 ++;
             newPaddles();
-            newBall();
+            newBall();            
+            scoreManager.increasePlayer2Score();
+
             //System.out.println("Player 2: "+score.player2);
         }
         if (ball.x >= Game_Width-Ball_Diameter){
             score.player1 ++;
             newPaddles();
             newBall();
+            scoreManager.increasePlayer1Score();
+
             //System.out.println("Player 1: "+score.player1);
         }
         if (ball.intersects(paddle1) || ball.intersects(paddle2)) {
             if(bounceSound!=null){
                 bounceSound.play();
             }
+        }
+        if (isGameOver) {
+            return;
+        }
+        if (scoreManager.isGameOver()) {
+            String winner = scoreManager.getWinner();
+            System.out.println("Game over! " + winner + " wins!");
+            scoreManager.saveHighScores(); // Save high scores
+            isGameOver = true;
         }
 
     }
@@ -132,7 +153,7 @@ public class GamePanel extends JPanel implements Runnable{
         double ns = 1000000000 / amountOfTicks;
         double delta = 0;
     
-        while(true){
+        while(true && !isGameOver){
             long now = System.nanoTime();
             delta += (now - lastTime) / ns;
             lastTime = now; // Update lastTime for the next iteration
